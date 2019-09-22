@@ -1,19 +1,18 @@
 <template>
-  <!--  账号输入登录-->
   <div class="login_box">
     <router-link to="/auth">
       <div class="login_close"></div>
     </router-link>
     <div class="login_panel">
       <div class="login_title">
-        <img src="../assets/img/logo.png" alt="">
+        <img src="../assets/img/logo.png" alt=""/>
         <p>输入账号进行安全登录</p>
       </div>
       <label style="margin-top: 50px">账号：</label>
-      <input v-model="userId" type="tel" pattern="^\d{11}$" title="请输入账号">
+      <input v-model="userId" type="tel" pattern="^\d{11}$" title="请输入账号"/>
       <label>密码：</label>
-      <input v-model="userPassword" type="password" title="请输入密码">
-      <input class="bt" @click="login" type="submit" value="登录">
+      <input v-model="userPassword" type="password" title="请输入密码"/>
+      <input class="bt" v-on:click="login" type="submit" value="登录"/>
     </div>
   </div>
 </template>
@@ -25,7 +24,7 @@ export default {
     return {
       userId: '',
       userPassword: '',
-      userInfoApi: 'http://localhost/login' // 通过用户ID登录接口
+      userInfoApi: 'http://localhost/login'
     }
   },
   methods: {
@@ -38,7 +37,6 @@ export default {
           userPassword: this.userPassword
         })
       }).then((response) => {
-        // 获取用户信息，登录成功
         if (response.data.data.userId !== 0) {
           this.$message({
             message: '登录成功！',

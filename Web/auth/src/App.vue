@@ -1,11 +1,6 @@
 <template>
   <div id="app">
-    <el-carousel height="100%" class="login_carousel" direction="vertical" :autoplay="true">
-      <el-carousel-item v-for="item in bgURL" :key="item">
-        <img class="login_bg" :src=item alt="用户头像"/>
-      </el-carousel-item>
-    </el-carousel>
-    <router-view></router-view>
+    
     <div class="login_content">
       <p><span class="left-quote"></span><span>Trunch·创趣</span></p>
       <p><span>创造点滴乐趣</span><span class="right-quote"></span></p>

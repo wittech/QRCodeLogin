@@ -1,18 +1,17 @@
 <template>
-  <!-- 扫码登录 -->
   <div class="login_box">
     <router-link to="/input">
       <div class="login_close"></div>
     </router-link>
     <div class="qrcode">
-      <img class="img" :src="imgURL" alt="登录码" v-show="state === 1||state === 3"/>
+      <img class="img" v-bind:src="imgURL" alt="登录码" v-show="state === 1||state === 3"/>
       <div class="empty" v-show="state === 0"></div>
       <div class="refresh" v-show="state === 3">
         <i class="refresh_mask"></i>
-        <i class="refresh_icon" @click="getToken"></i>
+        <i class="refresh_icon" v-on:click="getToken"></i>
       </div>
       <div class="result" v-show="state === 2">
-        <img class="u_avatar" :src="userAvatar" alt="用户头像"/>
+        <img class="u_avatar" v-bind:src="userAvatar" alt="用户头像"/>
         <p class="u_name">{{userName}}</p>
       </div>
       <div>
@@ -29,18 +28,18 @@ export default {
   name: 'Auth',
   data () {
     return {
-      state: 0, // 场景：0无登录码，1有登陆码，2正在登录，3登录码过期
-      count: 30, // 登录码有效倒计时（S）
-      tip: '正在获取登录码，请稍等', // 提示
-      imgURL: '', // 登录码路径
-      authToken: '', // 验证口令
-      userId: '', // 扫码登录的用户ID
-      userAvatar: '', // 扫码登录的用户头像
-      userName: '', // 扫码登录的用户名
-      tokenApi: 'http://localhost/auth/token', // 获取口令
-      tokenImgApi: 'http://localhost/auth/img/', // 获取口令对应的登录码
-      tokenInfoApi: 'http://localhost/auth/info/', // 获取口令信息
-      userInfoApi: 'http://localhost/login/getUser' // 获取用户信息
+      state: 0,
+      count: 30,
+      tip: '正在获取登录码，请稍等',
+      imgURL: '',
+      authToken: '',
+      userId: '',
+      userAvatar: '',
+      userName: '',
+      tokenApi: 'http://localhost/auth/token',
+      tokenImgApi: 'http://localhost/auth/img/',
+      tokenInfoApi: 'http://localhost/auth/info/',
+      userInfoApi: 'http://localhost/login/getUser'
     }
   },
   created () {
@@ -49,59 +48,49 @@ export default {
   methods: {
     getToken () {
       console.log('开始获取')
-      // 所有参数重置
-      this.state = 0 // 场景为无二维码
+      this.state = 0
       this.tip = '正在获取登录码，请稍等'
       this.count = 30
       clearInterval(this.timeCount)
-      // 开始获取新的token
       this.$ajax({
         method: 'post',
-        url: this.tokenApi // 获取口令的API
+        url: this.tokenApi
       }).then((response) => {
-        // 保存token，改变场景，显示登录码，开始轮询
         this.authToken = response.data.data
-        this.state = 1 // 场景为有登录码
+        this.state = 1
         this.tip = '请使用手机口令扫码登录'
-        this.imgURL = this.tokenImgApi + response.data.data // 拼装获得登录码链接
-        this.timeCount = setInterval(this.getTokenInfo, 1000) // 开启每隔1S的轮询，向服务器请求口令信息
+        this.imgURL = this.tokenImgApi + response.data.data
+        this.timeCount = setInterval(this.getTokenInfo, 1000)
       }).catch((error) => {
         console.log(error)
         this.getToken()
       })
     },
     getTokenInfo () {
-      // 登录码有效时间减少
       this.count--
-      // 登录码到期，改变场景
       if (this.count === 0) {
-        this.state = 3 // 场景为登录码过期
+        this.state = 3
         this.tip = '二维码已过期，请刷新'
       }
-      // 防止计数溢出
       if (this.count < -1000) {
         this.count = -1
       }
-      // 轮询查询token状态
       this.$ajax({
         method: 'post',
-        url: this.tokenInfoApi + this.authToken // 拼装获得口令信息API
+        url: this.tokenInfoApi + this.authToken
       }).then((response) => {
         let auth = response.data.data
-        // token状态为登录成功
         if (auth.authState === 1) {
           this.$message({
             message: '登录成功！',
             type: 'success'
           })
-          clearInterval(this.timeCount) // 关闭轮询，溜了
-          // token状态为正在登陆，改变场景，请求扫码用户信息
+          clearInterval(this.timeCount)
         } else if (auth.authState === 2) {
           this.userId = auth.userId
           this.getUserInfo()
           this.state = 2
           this.tip = '扫码成功，请在手机上确认'
-          // token状态为过期（服务器），改变场景
         } else if (auth.authState === 3) {
           this.state = 3
           this.tip = '二维码已过期，请刷新'
@@ -118,7 +107,6 @@ export default {
           userId: this.userId
         })
       }).then((response) => {
-        // 获取用户信息，并进行显示
         this.userName = response.data.data.userName
         this.userAvatar = response.data.data.userAvatar
         console.log(response.data.data)
